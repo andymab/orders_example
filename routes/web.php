@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,5 +19,5 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-
+Route::resource('orders', OrderController::class);
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
