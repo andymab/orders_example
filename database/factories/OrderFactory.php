@@ -16,18 +16,20 @@ class OrderFactory extends Factory
     {
         $status = 'Active';
         $text = $this->faker->realText(60, 2);
-        $comments = ['',$text];
-        $comment = $comments[rand(0,1)];
-        if($comment){
+        $comments = ['', $text];
+        $comment = $comments[rand(0, 1)];
+        if ($comment) {
             $status = 'Resolved';
         }
-
+        $date  = $this->faker->dateTimeBetween('-1 months', '-1 days');
         return [
-            'user_id'=>rand(3,15),
-            'manager_id'=>rand(1,2),
-            'status'=> $status,
-            'message'=>$this->faker->realText(200, 2),
-            'comment'=>$comment,
+            'user_id' => rand(3, 15),
+            'manager_id' => rand(1, 2),
+            'status' => $status,
+            'message' => $this->faker->realText(200, 2),
+            'comment' => $comment,
+            'created_at' => $date,
+            'updated_at' => $date,
         ];
     }
 }

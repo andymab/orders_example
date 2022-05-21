@@ -22,38 +22,56 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //admin показываем все заявки
         //manager только тe где его id =  manager_id
         //user только тe где его id =  user_id
-        if (Auth::user()->is_Admin()) {
-            $orders = DB::table('orders')
-                ->where('status', '=', 'Active')
-                ->leftJoin('users', 'orders.user_id', '=', 'users.id')
-                ->leftJoin('users as user_manager', 'orders.manager_id', '=', 'user_manager.id')
-                ->select('orders.*', 'user.name as user_name', 'user_manager.name as manager_name')
-                ->get();
-            return view('orders.index', compact('orders'));
-        } elseif (Auth::user()->is_Manager()) {
-            $orders = DB::table('orders')
-                ->where('status', '=', 'Active')
-                ->where('manager_id', '=', Auth::user()->id)
-                ->leftJoin('users', 'orders.user_id', '=', 'users.id')
-                ->leftJoin('users as user_manager', 'orders.manager_id', '=', 'user_manager.id')
-                ->select('orders.*', 'user.name as user_name', 'user_manager.name as manager_name')
-                ->get();
-            return view('orders.index', compact('orders'));
-        } else {
-            $orders = DB::table('orders')
-                ->where('status', '=', 'Active')
-                ->where('user_id', '=', Auth::user()->id)
-                ->leftJoin('users', 'orders.user_id', '=', 'users.id')
-                ->leftJoin('users as user_manager', 'orders.manager_id', '=', 'user_manager.id')
-                ->select('orders.*', 'user.name as user_name', 'user_manager.name as manager_name')
-                ->get();
-            return view('orders.index', compact('orders'));
+        //также работа с фильтрами запроса
+
+        $orderBy = ['updated_at DESC']; // default
+        $sort_date = ['desc' => 'DESC', 'asc' => 'ASC'];
+        if ($date_key =  filter_input(INPUT_GET, 'date_sort')) {
+            if (array_key_exists($date_key, $sort_date)) {
+                $orderBy = ['updated_at ' . $sort_date[$date_key]];
+            }
         }
+
+        $where = [];
+        // $where[] = ['status', '=', 'Active']; // default это будет сразу убирать кучи мусора и облегчать запрос
+        $status_where = ['Resolved', 'Active'];
+        if ($status_key =  filter_input(INPUT_GET, 'status')) {
+            if (in_array($status_key, $status_where)) {
+                $where[] = ['status', '=', $status_key];
+            }
+        }
+
+        $date_first = '1970-01-01'; //выставить квартал или год
+        $date_last  = date('Y-m-d');
+        if ($date_first_key =  filter_input(INPUT_GET, 'date_first')) {
+            $date_first =  $date_first_key;
+        }
+        if ($date_last_key =  filter_input(INPUT_GET, 'date_last')) {
+            $date_last =  $date_last_key;
+        }
+
+
+        if (Auth::user()->is_Manager()) {
+            $where[] = ['manager_id', '=', Auth::user()->id];
+        } elseif(Auth::user()->is_User()) {
+            $where[] = ['user_id', '=', Auth::user()->id];
+        }
+
+        $orders = DB::table('orders')
+            ->where($where)
+            ->whereDate('orders.updated_at', '<=', $date_last)
+            ->whereDate('orders.updated_at', '>=', $date_first)
+            ->leftJoin('users', 'orders.user_id', '=', 'users.id')
+            ->leftJoin('users as user_manager', 'orders.manager_id', '=', 'user_manager.id')
+            ->select('orders.*', 'users.name as user_name', 'user_manager.name as manager_name')
+            ->orderByRaw(implode(", ", $orderBy))
+            ->paginate(7);
+        return view('orders.index', compact('orders'));
     }
 
     /**
@@ -63,8 +81,9 @@ class OrderController extends Controller
      */
     public function create()
     {
-        $element = new stdClass();
-        return view('orders.create', compact('element'));
+        $element = false;
+        $managers = false;
+        return view('orders.create', compact('element', 'managers'));
     }
 
     /**
@@ -78,7 +97,7 @@ class OrderController extends Controller
         $admin = User::where('role', '=', 'admin')->first();
         $order =  new Order();
         $order->user_id = Auth::user()->id;
-        $order->manager_id = $admin;
+        $order->manager_id = $admin->id;
         $order->status = 'Active';
         $order->message = $request->message;
         $order->comment = '';
@@ -98,7 +117,7 @@ class OrderController extends Controller
             ->where('orders.id', '=', $id)
             ->leftJoin('users', 'orders.user_id', '=', 'users.id')
             ->leftJoin('users as user_manager', 'orders.manager_id', '=', 'user_manager.id')
-            ->select('orders.*', 'user.name as user_name', 'user_manager.name as manager_name')
+            ->select('orders.*', 'users.name as user_name', 'user_manager.name as manager_name')
             ->first();
         return view('orders.show', compact('element_order'));
     }
@@ -111,13 +130,21 @@ class OrderController extends Controller
      */
     public function edit($id)
     {
+        $managers = false;
+        if (Auth::user()->is_Admin()) {
+            $managers = DB::table('users')
+                ->where('role', '=', 'manager')
+                //->where('role', '=', 'admin')
+                ->get();
+        }
+
         $element = DB::table('orders')
             ->where('orders.id', '=', $id)
             ->leftJoin('users', 'orders.user_id', '=', 'users.id')
             ->leftJoin('users as user_manager', 'orders.manager_id', '=', 'user_manager.id')
-            ->select('orders.*', 'user.name as user_name', 'user_manager.name as manager_name')
+            ->select('orders.*', 'users.name as user_name', 'user_manager.name as manager_name')
             ->first();
-        return view('orders.edit', compact('element'));
+        return view('orders.edit', compact('element', 'managers'));
         //далее для админа кинем еще менеджеров для выбора
     }
 
@@ -130,27 +157,38 @@ class OrderController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+        $validated = $request->validate([
+            'message' => 'required|min:15',
+        ]);
+
+
+
         $el_db =  Order::where('id', $id)->first();
 
         if (!Auth::user()->is_Manager() and !Auth::user()->is_Admin()) {
             if ($el_db->user_id != Auth::user()->id) {
-                return redirect(route('oredrs.show', $el_db->id))->with('success', 'Вы не можете изменить эту заявку');
+                return redirect(route('orders.show', $el_db->id))->with('success', 'Вы не можете изменить эту заявку');
             }
         }
         if (Auth::user()->is_Manager() and  $el_db->manager_id != Auth::user()->id) {
-            return redirect(route('oredrs.show', $el_db->id))->with('success', 'За вами не закреплена эта заявка, Вы не можете изменить эту заявку');
+            return redirect(route('orders.show', $el_db->id))->with('success', 'За вами не закреплена эта заявка, Вы не можете изменить эту заявку');
         }
 
         //$el_db->manager_id = $request->manager_id; для админа
+        $el_db->status = 'Active';
+        $el_db->comment = '';
+
         if ((Auth::user()->is_Manager() or Auth::user()->is_Admin()) and $request->comment) {
             $el_db->comment = $request->comment;
             $el_db->status = 'Resolved';
-        } else {
-            $el_db->status = 'Active';
+        }
+        if (Auth::user()->is_Admin()) {
+            $el_db->manager_id = $request->manager;
         }
         $el_db->message = $request->message;
         $el_db->update();
-        return redirect(route('oredrs.show', $el_db->id))->with('success', 'Заявка успешно обновленна');
+        return redirect(route('orders.show', $el_db->id))->with('success', 'Заявка успешно обновленна');
     }
 
     /**
