@@ -57,7 +57,7 @@
            @endif
 
             <a href="{{ route('orders.index')}}" class="btn btn-outline-success
-                btn-sm">Вернуться</a>
+                btn-sm">К заявкам</a>
 
             @if ((Auth::user()->is_User() AND  (!$element OR $element->status !== 'Resolved')) OR ( Auth::user()->is_Admin() OR Auth::user()->is_Manager() ))
                 <button type="submit" class="btn btn-outline-primary btn-sm">Сохранить</button>    

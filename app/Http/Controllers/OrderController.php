@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Mail\OrderMailer;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Mail;
 use stdClass;
 
 class OrderController extends Controller
@@ -95,6 +97,7 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $admin = User::where('role', '=', 'admin')->first();
+
         $order =  new Order();
         $order->user_id = Auth::user()->id;
         $order->manager_id = $admin->id;
@@ -102,7 +105,13 @@ class OrderController extends Controller
         $order->message = $request->message;
         $order->comment = '';
         $order->save();
-        return redirect(route('orders.show', $order->id))->with('success', 'Заявка успешно создана');
+        $mail = new stdClass;
+        $mail->name = Auth::user()->name;
+        $mail->message = $order->message ."<br><br> Ваша заявка будет обработана нашими менеджерами в ближайшее время";
+        $mail->subject = "Вы оставили у нас заявку";
+
+        Mail::to(Auth::user()->email)->send(new OrderMailer($mail));
+        return redirect(route('orders.show', $order->id))->with('success', 'Заявка успешно создана, уведомление отправлено на почту');
     }
 
     /**
@@ -161,9 +170,7 @@ class OrderController extends Controller
         $validated = $request->validate([
             'message' => 'required|min:15',
         ]);
-
-
-
+$message = "";
         $el_db =  Order::where('id', $id)->first();
 
         if (!Auth::user()->is_Manager() and !Auth::user()->is_Admin()) {
@@ -182,6 +189,13 @@ class OrderController extends Controller
         if ((Auth::user()->is_Manager() or Auth::user()->is_Admin()) and $request->comment) {
             $el_db->comment = $request->comment;
             $el_db->status = 'Resolved';
+            $user = USER::find($el_db->user_id);
+            $mail = new stdClass;
+            $mail->name = $user->name;
+            $mail->message = $el_db->comment ;
+            $mail->subject = "Ответ на Вашу заявку от " . Auth::user()->name;
+            Mail::to($user->email)->send(new OrderMailer($mail));
+            $message = " письмо отправлено $user->email ";
         }
         if (Auth::user()->is_Admin()) {
             $el_db->manager_id = $request->manager;

@@ -1,55 +1,101 @@
-## [Техническое задание](https://laravel.com/docs/routing)
+# Общее описание:
+Реализована система принятия и обработки заявок пользователей с сайта. 
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Любой (Зарегистрировавшийся) пользователь может отправить данные по публичному API, реализованному мной, оставив заявку с каким-то текстом,. 
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Затем заявка рассматривается Пользователем с ролью Администратор и назначается ответственный за ее выполнение Менеджер
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Затем заявка рассматривается Менеджером и ей устанавливается статус Завершено. 
+Чтобы установить этот статус, ответственное лицо должно оставить комментарий. 
+Пользователь получает свой ответ по email.
+При этом, Менеджер  имеет возможность получить список заявок, отфильтровать их по статусу и по дате, периоду.
 
-## Learning Laravel
+# Установка
+Должно быть установлено:
+- php 7.3 и выше
+- Mysql 8 и выше
+- composer,nodejs,npm
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+инсталяция:
+- git clone https://github.com/andymab/orders_example.git you-domain
+- cd you-domain
+- composer all
+- npm install && npm run dev
+- cp .env.example .env
+- В .env установить базу данных, пароль, логин, MAIL_MAILER=log
+- php artisan migrate --seed
+- php artisan serve
+# Пароли
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-## Laravel Sponsors
+*Управляющий* role.admin:
+- распределяет заявки менеджерам (ответственным лицам) 
+- Видит все заявки
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+*login: admin@localhost password: admin*
 
-### Premium Partners
+*Менеджер* role.manager
+- Видит только свои заявки, 
+- Закрывает, 
+- Отвечает и отправляет письма заказчикам
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+*login: manager@localhost password: manager*
 
-## Contributing
+*Пользователь* role.user: 
+- Создает заявку и отправляется письмо
+- видит только свои заявки
+- удаляет
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+*login: user@localhost password: user*
 
-## Code of Conduct
+# Сущности
+Users | Пользователи
+--- |---
+id|Уникальный идентификатор
+name | string
+email |Уникальный идентификатор
+email_verified_at| верификация дата
+role| enum ['user','admin','manager'] default('user')
+password| hash
+created_at | Время создания
+updated_at | Время обновленя
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
+ Orders |(заявки) 
+---|---
+ id | Уникальный идентификатор |
+| user_id | bigint ссылка на user->id автор заявки |
+| manager_id | bigint ссылка на user->id ответственное лицо |
+| status | Статус - enum(“Active”, “Resolved”) Resolved если есть comment |
+| message | Сообщение пользователя - текст, обязательный |
+| comment | Ответ ответственного лица - текст, обязательный, если статус Resolved |
+| created_at | Время создания заявки - timestamp или datetime |
+| updated_at | Время ответа на заявку |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Контроллеры
+OrderController | Обработка заявок (Основной REST контроллер)
+---|---
+index| GET/HEAD показ заявок включая фильтрацию
+create| GET/HEAD показ пустой новой формы заявки
+store| POST запись новой заявки
+show|  GET/HEAD показ одной заявки
+edit| GET/HEAD показ заполненой формы для одной заявки
+update| PUT/PATCH изменение существующей заявки
+destroy| DELETE удаление одной заявки
+         
+# Дополнение
+Безопасность входящих запросов, чтобы избежать кроссдоменных запросов регулируется @csrf laravel
+проверяются пользователи, роли, возмжности на уровне сервера и на уровне html
 
-## License
+Для большего объема заявок используется paginate() в дальнейшем cursorpaginate возможно использование datatables.js с server-side механизмом объемы данных при этом не ограничены, но необходимо а индексировать все фильтруемые поля и использовать специализированную базу даннных
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Пути развития
+(или на что времени не хватило)
+При большом объеме заявок 
+- вместо paginate() необхлодимо использовать cursorPaginate
+- отправка Почты должна вестись через постановку в очередь и обработку событий
+- не написаны тесты
+- не создана документация подключил бы плагин чтобы документация формировалась автоматически
+- не переведены lang
+- отсутствует дизайн
+- и хорошо бы пробежать и все почистить
