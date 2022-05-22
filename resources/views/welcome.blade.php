@@ -419,150 +419,142 @@
             @endauth
         </div>
         @endif
-
+<style>
+.lead p{
+    padding: 0;
+    margin: 0;
+}
+</style>
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             <div class="flex justify-center pt-8 sm:justify-start sm:pt-0">
                 <img src="/media/index.png" alt="" sizes="" srcset="">
             </div>
 
-            <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
-                <div class="grid grid-cols-1 md:grid-cols-2">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-8 h-8 text-gray-500">
-                                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                            </svg>
-                            <div class="ml-4 text-lg leading-7 font-semibold"><a target="_blank" href="https://docs.google.com/document/d/1vfHYU8E_SPL9h_hGoXWN0b4AyCRsWlIn_cHLyp4P5Z8/edit" class="underline text-gray-900 dark:text-white">Техническое задание</a></div>
-                        </div>
+            <div class="pt-8 sm:justify-start sm:pt-0 lead">
+                <h2>Общее описание:</h2>
+                <hr>
+<p>Реализована система принятия и обработки заявок пользователей с сайта. </p>
 
-                        <div class="ml-12">
-                            <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                Данное тестовое задание не направлено на полноценную реализацию задачи, сколько на возможность продемонстрировать уровень понимая в таких вопросах, как: PHP, REST API, работа с СУБД, основы безопасности.
-                            </div>
-                        </div>
-                    </div>
+<p>Любой (Зарегистрировавшийся) пользователь может отправить данные по публичному API, реализованному мной, оставив заявку с каким-то текстом,. </p>
 
-                    <div class="p-6 border-t border-gray-200 dark:border-gray-700 md:border-t-0 md:border-l">
-                        <div class="flex items-center">
-                            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-8 h-8 text-gray-500">
-                                <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            <div class="ml-4 text-lg leading-7 font-semibold"><a href="#" class="text-gray-900 dark:text-dark" style="color:#ff3f3f ;">Описание ролей !!!</a></div>
-                        </div>
+<p>Затем заявка рассматривается Пользователем с ролью Администратор и назначается ответственный за ее выполнение Менеджер</p>
 
-                        <div class="ml-12">
-                            <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                <p> Управляющий, распределяющий заявки менеджерам (ответственным лицам)
-                                    Видит все заявки, назначает заявки ответственным
-                                                                        <br>
-                                    <span style="color:#ff3f3f ;">
-                                        <strong> login: admin@localhost psw: admin</strong>
-                                    </span>
-                                </p>
-                                <p> Менеджер
-                                    Видит только свои заявки, Закрывает, Отвечает и отправляет письма заказчикам
-                                    <br>
-                                    <span style="color:#ff3f3f ;">
-                                        <strong> login: manager@localhost psw: manager</strong>
-                                    </span>
-                                </p>
-                                <p> User
-                                    Видит только свои заявки, Удаляет, Отвечает и отправляет письма своему Менеджеру
-                                    <br>
-                                    <span style="color:#ff3f3f ;">
-                                        <strong> login: user@localhost psw: user</strong></span>
-                                </p>
+<p>
+    Затем заявка рассматривается Менеджером и ей устанавливается статус Завершено.
+    Чтобы установить этот статус, ответственное лицо должно оставить комментарий.
+    Пользователь получает свой ответ по email.
+    При этом, Менеджер  имеет возможность получить список заявок, отфильтровать их по статусу и по дате, периоду.
+</p>
+
+<h2>Установка</h2><hr>
+<p>Должно быть установлено:</p>
+<ul>
+    <li>- php 7.3 и выше</li>
+    <li>- Mysql 8 и выше</li>
+    <li>- composer,nodejs,npm</li>
+</ul>
+
+инсталяция:
+<ul>
+    <li>- git clone https://github.com/andymab/orders_example.git you-domain</li>
+    <li>- cd you-domain</li>
+    <li>- composer all</li>
+    <li>- npm install && npm run dev</li>
+    <li>- cp .env.example .env</li>
+    <li>- В .env установить базу данных, пароль, логин, MAIL_MAILER=log</li>
+    <li>- php artisan migrate --seed</li>
+    <li>- php artisan serve</li>
+</ul>
+<h2>Пароли</h2><hr>
 
 
-                            </div>
-                        </div>
-                    </div>
+<p>*Управляющий* role.admin:</p>
+<ul>
+    <li>- распределяет заявки менеджерам (ответственным лицам)</li>
+    <li>- Видит все заявки</li>
+    <li>login: admin@localhost password: admin</li>
+</ul>
 
-                    <div class="p-6 border-t border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center">
-                            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-8 h-8 text-gray-500">
-                                <path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
-                            </svg>
-                            <div class="ml-4 text-lg leading-7 font-semibold"><a href="#" class="text-gray-900 dark:text-white">Техническое решение</a></div>
-                        </div>
 
-                        <div class="ml-12">
-                            <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                <dl>
-                                    <dt><strong>Основной стек</strong></dt>
-                                    <dd>Laravel v8.83.13 (PHP v7.3.33-1 + Mysql)
-                                        <br>
-                                        GIT: https://github.com/andymab/orders_example
-                                        <br>
-                                        Nodejs,composer
-                                    </dd>
 
-                                    <dt><strong>Дополнительно Библиотеки</strong></dt>
-                                    <dd>ui, ui bootstrap, ui bootstrap --auth</dd>
-                                    <dt><strong>Migratins</strong> (Структура таблиц)</dt>
-                                    <dd><strong>User</strong>
-                                        <br>
-                                        <strong>Order</strong>
-                                        <br> !!! вместо предложенного сомнительного rest запроса <strong>/requests</strong> (заявка)
-                                         изменены на <strong>/orders</strong>, соответствующие model и controller
-                                    </dd>
-                                    <dt><strong>Models </strong>(Модели)</dt>
-                                    <dd><strong>User::(Пользователь)</strong> Добавлены сущьность enum 'role' [admin,manager,user] и три methods is_Admin,is_Manager,is_User возвращающие true/false
-                                        <br>
-                                        <strong>Order::(Заявка) </strong>Помимо сущностей технического задания добавлены:
-                                        <br>
-                                        'user_id' - пользователь создавший заявку, 
-                                        <br>
-                                        'manager_id' - Менеджер прикрепленный к заявке.
-                                    </dd>
-                                    <dt><strong>Factory,Seeder</strong> (Фабрики,Наполнители) способные предварительно заполнить данными</dt>
-                                    <dd><strong>UserFactory</strong>
-                                        <br>
-                                        <strong>OrderFactory</strong>
-                                        <br>
-                                        <strong>UsersTableSeeder</strong>
-                                        <br>
-                                        <strong>OrderTableSeader</strong>
-                                    </dd>
-                                    <dt><strong>Route::</strong> (Маршруты) дополнительно создан *один (групповой)* ресурсный маршрут использующий типовой REST</dt>
-                                    <dd><strong>Route::resource('orders', OrderController::class);</strong>
-                                    </dd>
-                                    <dt><strong>Controllers::</strong> (Controller) дополнительно </dt>
-                                    <dd><strong>OrderController</strong>  обрабатывающий логику Rest запросов он использует одно midllware auth и модель auth->user для проверки и вывода необходимого функционала заданного в техническом задании
-                                    </dd>
-                                    <dt><strong>Views</strong> (Представления) дополнительно </dt>
-                                    <dd><strong>orders/index.blade.php</strong>
-                                    <dd><strong>orders/edit.blade.php</strong>
-                                    <dd><strong>orders/show.blade.php</strong>
-                                    <dd><strong>orders/create.blade.php</strong>
-                                   </dd>
-                                   <dt><strong>Основы безопасности</strong> </dt>
-                                   <dd><strong>@@csrf </strong> Кросдоменная защита стандартным laravel</dd>
-                                   <dd><strong>Auth</strong> только авторизованные пользователи могут работать с заявками стандартная поставка без двухфакторной авторизации</dd>
-                                   <dd><strong>$validation </strong> на стороне сервера стандартным laravel</dd>
-                                   <dd><strong>html5 (required)</strong> на стороне пользователя</dd>
-                                   <dd><strong>is_Admin(), is_Manager(), is_User()</strong> дополнительные роли в модели и проверки доступности доступа в ресурсном контроллере к update сущьностям на стороне сервера</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
+<p>*Менеджер* role.manager</p>
 
-                    <div class="p-6 border-t border-gray-200 dark:border-gray-700 md:border-l">
-                        <div class="flex items-center">
-                            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-8 h-8 text-gray-500">
-                                <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <div class="ml-4 text-lg leading-7 font-semibold text-gray-900 dark:text-white">Vibrant Ecosystem</div>
-                        </div>
+<ul>
+    <li>- Видит только свои заявки,</li>
+    <li>- Закрывает,</li>
+    <li>- Отвечает и отправляет письма заказчикам</li>
+    <li>login: manager@localhost password: manager</li>
+</ul>
 
-                        <div class="ml-12">
-                            <div class="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                                Laravel's robust library of first-party tools and libraries, such as <a href="https://forge.laravel.com" class="underline">Forge</a>, <a href="https://vapor.laravel.com" class="underline">Vapor</a>, <a href="https://nova.laravel.com" class="underline">Nova</a>, and <a href="https://envoyer.io" class="underline">Envoyer</a> help you take your projects to the next level. Pair them with powerful open source libraries like <a href="https://laravel.com/docs/billing" class="underline">Cashier</a>, <a href="https://laravel.com/docs/dusk" class="underline">Dusk</a>, <a href="https://laravel.com/docs/broadcasting" class="underline">Echo</a>, <a href="https://laravel.com/docs/horizon" class="underline">Horizon</a>, <a href="https://laravel.com/docs/sanctum" class="underline">Sanctum</a>, <a href="https://laravel.com/docs/telescope" class="underline">Telescope</a>, and more.
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<p>*Пользователь* role.user: </p>
+<ul>
+    <li>- Создает заявку и отправляется письмо</li>
+    <li>- видит только свои заявки</li>
+    <li>- удаляет</li>
+    
+    <li>login: user@localhost password: user</li>
+</ul>
+
+<h2>Сущности</h2><hr>
+<pre>
+    Users | Пользователи
+    --- |---
+    id|Уникальный идентификатор
+    name | string
+    email |Уникальный идентификатор
+    email_verified_at| верификация дата
+    role| enum ['user','admin','manager'] default('user')
+    password| hash
+    created_at | Время создания
+    updated_at | Время обновленя
+    
+    
+     Orders |(заявки)
+    ---|---
+     id | Уникальный идентификатор |
+    | user_id | bigint ссылка на user->id автор заявки |
+    | manager_id | bigint ссылка на user->id ответственное лицо |
+    | status | Статус - enum(“Active”, “Resolved”) Resolved если есть comment |
+    | message | Сообщение пользователя - текст, обязательный |
+    | comment | Ответ ответственного лица - текст, обязательный, если статус Resolved |
+    | created_at | Время создания заявки - timestamp или datetime |
+    | updated_at | Время ответа на заявку |
+</pre>
+
+<h2>Контроллеры</h2><hr>
+<pre>
+    OrderController | Обработка заявок (Основной REST контроллер)
+    ---|---
+    index| GET/HEAD показ заявок включая фильтрацию
+    create| GET/HEAD показ пустой новой формы заявки
+    store| POST запись новой заявки
+    show|  GET/HEAD показ одной заявки
+    edit| GET/HEAD показ заполненой формы для одной заявки
+    update| PUT/PATCH изменение существующей заявки
+    destroy| DELETE удаление одной заявки
+</pre>
+         
+<h2>Дополнение</h2><hr>
+<p>
+    Безопасность входящих запросов, чтобы избежать кроссдоменных запросов регулируется @csrf laravel
+    проверяются пользователи, роли, возмжности на уровне сервера и на уровне html
+</p>
+
+<p>Для большего объема заявок используется paginate() в дальнейшем cursorpaginate возможно использование datatables.js с server-side механизмом объемы данных при этом не ограничены, но необходимо а индексировать все фильтруемые поля и использовать специализированную базу даннных</p>
+
+<h2>Пути развития</h2><hr>
+<pre>
+    (или на что времени не хватило)
+    При большом объеме заявок
+    - вместо paginate() необхлодимо использовать cursorPaginate
+    - отправка Почты должна вестись через постановку в очередь и обработку событий
+    - не написаны тесты
+    - не создана документация подключил бы плагин чтобы документация формировалась автоматически
+    - не переведены lang
+    - отсутствует дизайн
+    - и хорошо бы пробежать и все почистить
+</pre>
+
             </div>
 
             <div class="flex justify-center mt-4 sm:items-center sm:justify-between">
